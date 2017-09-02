@@ -99,7 +99,7 @@ class gradient_structure
 #endif
  private:
    static long int USE_FOR_HESSIAN;
-   static long int NVAR;
+   static unsigned long NVAR;
    static unsigned int NUM_RETURN_ARRAYS;
    static dvariable **RETURN_ARRAYS;
    static unsigned int RETURN_ARRAYS_PTR;
@@ -135,7 +135,7 @@ class gradient_structure
    // member functions can call it
    static void check_set_error(const char *variable_name);
 
-   static int instances;
+   static unsigned int instances;
    int x;
 
  public:
@@ -155,13 +155,19 @@ class gradient_structure
       USE_FOR_HESSIAN = i;
    }
    friend class dfsdmat;
-   gradient_structure(long int size = 100000L);// constructor
-   ~gradient_structure(void);// destructor
+
+   gradient_structure(): gradient_structure(100000L) {}
+   gradient_structure(const unsigned long int size);
+   ~gradient_structure();
+
    static void save_variables(void);
    static void restore_variables(void);
    static void save_arrays(void);
    static void restore_arrays(void);
    static size_t totalbytes(void);
+
+   static unsigned long get_NVAR() { return NVAR; }
+   static unsigned int get_instances() { return instances; }
    friend dvector restore_dvar_vector_value(
      const dvar_vector_position& tmp);
    friend void cleanup_temporary_files();

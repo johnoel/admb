@@ -76,7 +76,7 @@ int gradient_structure::NUM_DEPENDENT_VARIABLES = 2000;
   int gradient_structure::no_derivatives = 0;
 #endif
 unsigned long int gradient_structure::max_last_offset = 0;
-long int gradient_structure::NVAR = 0;
+unsigned long gradient_structure::NVAR = 0;
 size_t gradient_structure::TOTAL_BYTES = 0;
 size_t gradient_structure::PREVIOUS_TOTAL_BYTES = 0;
 long int gradient_structure::USE_FOR_HESSIAN = 0;
@@ -84,7 +84,7 @@ dvariable** gradient_structure::RETURN_ARRAYS = NULL;
 unsigned int gradient_structure::RETURN_ARRAYS_PTR;
 dvariable ** gradient_structure::RETURN_PTR_CONTAINER = NULL;
 unsigned int gradient_structure::RETURN_ARRAYS_SIZE = 70;
-int gradient_structure::instances = 0;
+unsigned int gradient_structure::instances = 0;
 //int gradient_structure::RETURN_INDEX = 0;
 //dvariable * gradient_structure::FRETURN = NULL;
 dvariable * gradient_structure::MAX_RETURN = NULL;
@@ -280,18 +280,16 @@ void allocate_dvariable_space()
 
 /**
 Constructor
+\param size
 */
-gradient_structure::gradient_structure(long int _size):
-  x(0)
+gradient_structure::gradient_structure(const unsigned long int size): x(0)
 {
 #ifndef OPT_LIB
-  assert(_size > 0);
+  assert(size > 0);
 #endif
-  gradient_structure::NVAR=0;
+  gradient_structure::NVAR = 0;
   atexit(cleanup_temporary_files);
   fill_ad_random_part();
-
-  const unsigned long int size = (unsigned long int)_size;
 
   if (instances++ > 0)
   {
