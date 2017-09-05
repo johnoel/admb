@@ -991,6 +991,21 @@ class grad_stack
    char *get_gradfile_name();
    friend class gradient_structure;
    //int get_ngradfiles();
+
+  unsigned int ptr_index() const
+  {
+    unsigned int index = 0;
+    if (ptr_first != ptr)
+    {
+      grad_stack_entry* tracer = ptr;
+      do
+      {
+        --tracer;
+        ++index;
+      } while (tracer != ptr_first);
+    }
+    return index;
+  }
 };
 
 

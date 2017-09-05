@@ -17,7 +17,7 @@ else
 GTEST_DIR=googletest-read-only/googletest
 endif
 
-GTESTS=\
+GTESTS2=\
  test_adstring_strcase.cpp\
  test_fmm_control.cpp\
  test_adstring_array.cpp\
@@ -102,6 +102,9 @@ GTESTS=\
  test_i3_array.cpp\
  test_i4_array.cpp\
  test_i5_array.cpp\
+ main.cpp
+
+GTESTS=\
  test_gradcalc.cpp\
  main.cpp
 
