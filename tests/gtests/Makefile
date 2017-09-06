@@ -105,6 +105,7 @@ GTESTS2=\
  main.cpp
 
 GTESTS=\
+ sgradclc.cpp\
  test_gradcalc.cpp\
  main.cpp
 
