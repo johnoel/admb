@@ -66,7 +66,6 @@ GTESTS2=\
  test_dvar3_array.cpp\
  test_dvar6_array.cpp\
  test_dvar7_array.cpp\
- test_arr_link.cpp\
  test_df1b2_init_number_vector.cpp\
  test_init_df1b2vector.cpp\
  test_param_init_bounded_number.cpp\
@@ -105,6 +104,8 @@ GTESTS2=\
  main.cpp
 
 GTESTS=\
+ test_arr_list.cpp\
+ test_arr_link.cpp\
  sgradclc.cpp\
  test_gradcalc.cpp\
  main.cpp
