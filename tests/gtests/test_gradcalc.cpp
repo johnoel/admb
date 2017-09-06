@@ -264,7 +264,6 @@ TEST_F(test_gradcalc, cube_square_then_minus)
 {
   ad_exit=&test_ad_exit;
 
-
   independent_variables x(1, 1);
   x(1) = 5;
 
@@ -353,4 +352,51 @@ TEST_F(test_gradcalc, why_did_profile_likelihood_break)
   //gradient stacks.  f_total = cube(x) - square(x)
   ASSERT_DOUBLE_EQ(100, f - f2);
   ASSERT_DOUBLE_EQ(65, g(1) - g2(1));
+}
+TEST_F(test_gradcalc, split_cube_minus_square)
+{
+  ad_exit=&test_ad_exit;
+
+  dvector g(1, 1);
+  g(1) = 12345;
+
+  independent_variables x(1, 1);
+  x(1) = 5;
+
+  //Increases gradient_structure::instances.
+  gradient_structure gs;
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->get_number_arr_links());
+  ASSERT_EQ(0, gradient_structure::ARR_LIST1->get_last_offset());
+
+  dvar_vector variables(x);
+  ASSERT_EQ(1, gradient_structure::ARR_LIST1->get_number_arr_links());
+  ASSERT_EQ(8, gradient_structure::ARR_LIST1->get_last_offset());
+  ASSERT_EQ(8, gradient_structure::ARR_LIST1->get_max_last_offset());
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
+
+  dvariable a = cube(variables(1));
+  dvariable b = square(variables(1));
+  dvariable result = a - b;
+
+  ASSERT_EQ(6, gradient_structure::GRAD_STACK1->ptr_index());
+
+  double f = value(result);
+  ASSERT_DOUBLE_EQ(100, f);
+
+  ASSERT_EQ(6, gradient_structure::GRAD_STACK1->ptr_index());
+
+  ASSERT_EQ(gradient_structure::totalbytes(), 0);
+  gradcalc(1, g);
+  ASSERT_EQ(gradient_structure::totalbytes(), 0);
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
+
+  //No operations done...gradients are just zero.
+  ASSERT_DOUBLE_EQ(65, g(1));
+  ASSERT_EQ(1, gradient_structure::ARR_LIST1->get_number_arr_links());
+  ASSERT_EQ(8, gradient_structure::ARR_LIST1->get_last_offset());
+  ASSERT_EQ(8, gradient_structure::ARR_LIST1->get_max_last_offset());
 }
