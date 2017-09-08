@@ -347,8 +347,9 @@ while (cntrl.ireturn >= 0) \
   } \
 }
 
+class grad_stack_entry;
 void default_evaluation4ind(void);
-void default_evaluation(void);
+void default_evaluation(grad_stack_entry*);
 void default_evaluation0(void);
 void default_evaluation1(void);
 void default_evaluation1m(void);
@@ -869,6 +870,7 @@ class grad_stack_entry
  public:
    ///< Pointer to function (if any) to be used for derivative calculation
    void (*func) (void);
+   void (*func2)(grad_stack_entry*);
    double *dep_addr;    ///< Pointer to dependent variable
    double *ind_addr1;   ///< Pointer to first independent variable
    double mult1;        ///< First mutiplicand in chain rule multipication
@@ -878,7 +880,6 @@ class grad_stack_entry
    friend void gradcalc(int nvar, const dvector & g);
    friend void slave_gradcalc(void);
    friend void gradloop();
-   friend void default_evaluation(void);
    friend class grad_stack;
    friend void gradient_structure::jacobcalc(int nvar,
      const dmatrix & jac);
@@ -930,7 +931,6 @@ class grad_stack
    friend void gradcalc(int nvar, const dvector & g);
    friend void slave_gradcalc(void);
    friend void funnel_gradcalc(void);
-   friend void default_evaluation(void);
    friend void default_evaluation3ind(void);
    friend void reset_gradient_stack(void);
    friend void default_evaluation4ind(void);
@@ -947,10 +947,13 @@ class grad_stack
      double *dep_addr, double *ind_addr1 = NULL, double mult1 = 0,
      double *ind_addr2 = NULL, double mult2 = 0);
 
+   void set_gradient_stack(void (*func) (grad_stack_entry*),
+     double *dep_addr, double *ind_addr1 = NULL, double mult1 = 0,
+     double *ind_addr2 = NULL, double mult2 = 0);
+
    void set_gradient_stack(void (*func) (void),
      double *dep_addr, double *ind_addr1,
      double *ind_addr2);
-
 
    void set_gradient_stack0(void (*func) (void), double *dep_addr);
 
@@ -1022,24 +1025,12 @@ inline void grad_stack::set_gradient_stack(void (*func) (void),
    if (!gradient_structure::no_derivatives)
    {
 #endif
-#     if defined(MYDEBUG)
-      int wrote_buffer = 0;
-#     endif
       if (ptr > ptr_last)
       {
         // current buffer is full -- write it to disk and reset pointer
         // and counter
         this->write_grad_stack_buffer();
-#     if defined(MYDEBUG)
-        wrote_buffer = 1;
-#     endif
       }
-#     if defined(MYDEBUG)
-      if (wrote_buffer == 1)
-      {
-        cout << "WROTE BUFFER" << endl;
-      }
-#     endif
       ptr->func = func;
       ptr->dep_addr = dep_addr;
       ptr->ind_addr1 = ind_addr1;
@@ -1056,6 +1047,32 @@ inline void grad_stack::set_gradient_stack(void (*func) (void),
    //   double * dep_addr,double * ind_addr1, double mult1, double * ind_addr2,
     //  double mult2);
 #endif
+inline void grad_stack::set_gradient_stack(void (*func) (grad_stack_entry*),
+  double *dep_addr, double *ind_addr1, double mult1, double *ind_addr2,
+  double mult2)
+{
+#ifdef NO_DERIVS
+   if (!gradient_structure::no_derivatives)
+   {
+#endif
+      if (ptr > ptr_last)
+      {
+        // current buffer is full -- write it to disk and reset pointer
+        // and counter
+        this->write_grad_stack_buffer();
+      }
+      ptr->func = nullptr;
+      ptr->func2 = func;
+      ptr->dep_addr = dep_addr;
+      ptr->ind_addr1 = ind_addr1;
+      ptr->mult1 = mult1;
+      ptr->ind_addr2 = ind_addr2;
+      ptr->mult2 = mult2;
+      ptr++;
+#ifdef NO_DERIVS
+   }
+#endif
+}
 
 /**
  * Description not yet available.
@@ -1240,6 +1257,7 @@ inline void grad_stack::set_gradient_stack(void (*func) (void))
 
       ptr->dep_addr = NULL;
       ptr->func = func;
+      ptr->func2 = nullptr;
       // want to put a long int into the memory space of a double
       ptr->ind_addr2 = NULL;
       ptr->mult2 = 0;
