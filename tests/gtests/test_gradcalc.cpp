@@ -378,9 +378,10 @@ TEST_F(test_gradcalc, split_cube_minus_square)
   ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
 
   dvariable a = cube(variables(1));
+  ASSERT_EQ(2, gradient_structure::GRAD_STACK1->ptr_index());
   dvariable b = square(variables(1));
+  ASSERT_EQ(4, gradient_structure::GRAD_STACK1->ptr_index());
   dvariable result = a - b;
-
   ASSERT_EQ(6, gradient_structure::GRAD_STACK1->ptr_index());
 
   double f = value(result);
