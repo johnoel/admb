@@ -168,17 +168,16 @@ void gradcalc(int nvar, const dvector& _g)
 #else
     grad_stack_entry* grad_ptr_first =
       gradient_structure::GRAD_STACK1->ptr_first;
-    while (gradient_structure::GRAD_STACK1->ptr-- >
-             grad_ptr_first)
+    while (gradient_structure::GRAD_STACK1->ptr-- > grad_ptr_first)
     {
-      (*(gradient_structure::GRAD_STACK1->ptr->func))();
-/*
-      icount++;
-      if (icount%1000==0)
+      if (gradient_structure::GRAD_STACK1->ptr->func == nullptr)
       {
-        //cout << "icount = " << icount << endl;
+        (*(gradient_structure::GRAD_STACK1->ptr->func2))(gradient_structure::GRAD_STACK1->ptr);
       }
-*/
+      else
+      {
+        (*(gradient_structure::GRAD_STACK1->ptr->func))();
+      }
     }
 #endif
 

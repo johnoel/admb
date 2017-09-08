@@ -63,10 +63,9 @@
  * Description not yet available.
  * \param
  */
-  void default_evaluation(void)
+void default_evaluation(grad_stack_entry* grad_ptr)
   {
     // checks to see how many independent variables there are
-    grad_stack_entry * grad_ptr = gradient_structure::GRAD_STACK1->ptr;
     double * zptr = grad_ptr->dep_addr;
     double z = *zptr;
     *zptr = 0;

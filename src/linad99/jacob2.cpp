@@ -207,10 +207,13 @@ void gradient_structure::jacobcalc(int nvar, const ofstream& _ofs)
       while (gradient_structure::GRAD_STACK1->ptr-- >
              gradient_structure::GRAD_STACK1->ptr_first)
       {
-        //grad_stack_entry* grad_ptr =
-        //gradient_structure::GRAD_STACK1->ptr;
+        if (gradient_structure::GRAD_STACK1->ptr->func == nullptr)
         {
-          (* gradient_structure::GRAD_STACK1->ptr->func)();
+          (*(gradient_structure::GRAD_STACK1->ptr->func2))(gradient_structure::GRAD_STACK1->ptr);
+        }
+        else
+        {
+          (*(gradient_structure::GRAD_STACK1->ptr->func))();
         }
       }
       #endif

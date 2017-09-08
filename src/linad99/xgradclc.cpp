@@ -160,13 +160,23 @@ do
     while (gradient_structure::GRAD_STACK1->ptr-- >
            grad_ptr_first)
     {
-      if (!gradient_structure::GRAD_STACK1->ptr->func)
+      if (!gradient_structure::GRAD_STACK1->ptr->func
+          && !gradient_structure::GRAD_STACK1->ptr->func2)
       {
         funnel_flag=1;
         break;
       }
       else
-        (*(gradient_structure::GRAD_STACK1->ptr->func))();
+      {
+        if (gradient_structure::GRAD_STACK1->ptr->func == nullptr)
+        {
+          (*(gradient_structure::GRAD_STACK1->ptr->func2))(gradient_structure::GRAD_STACK1->ptr);
+        }
+        else
+        {
+          (*(gradient_structure::GRAD_STACK1->ptr->func))();
+        }
+      }
     }
 
   #endif
