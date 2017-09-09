@@ -1009,6 +1009,22 @@ class grad_stack
     }
     return index;
   }
+  grad_stack_entry* get_element(const unsigned int index) const
+  {
+    grad_stack_entry* element = ptr_first;
+
+    unsigned int count = 0;
+    while (element != ptr)
+    {
+      if (count == index)
+      {
+        return element;
+      }
+      ++element;
+      ++count;
+    }
+    return nullptr;
+  }
 };
 
 

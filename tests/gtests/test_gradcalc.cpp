@@ -401,3 +401,39 @@ TEST_F(test_gradcalc, split_cube_minus_square)
   ASSERT_EQ(8, gradient_structure::ARR_LIST1->get_last_offset());
   ASSERT_EQ(8, gradient_structure::ARR_LIST1->get_max_last_offset());
 }
+TEST_F(test_gradcalc, pow_manual_gradcalc)
+{
+  ad_exit=&test_ad_exit;
+
+  dvector g(1, 1);
+  g(1) = 12345;
+
+  independent_variables x(1, 1);
+  x(1) = 5;
+
+  //Increases gradient_structure::instances.
+  gradient_structure gs;
+
+  dvar_vector variables(x);
+
+  dvariable result = pow(variables(1), 2.0);
+
+  double f = value(result);
+
+  //Points at next available element.
+  ASSERT_EQ(2, gradient_structure::GRAD_STACK1->ptr_index());
+
+  //pow function
+  grad_stack_entry* e0 = gradient_structure::GRAD_STACK1->get_element(0);
+  ASSERT_EQ(nullptr, e0->func);
+  ASSERT_EQ(&default_evaluation, e0->func2);
+  (*(e0->func2))(e0);
+
+  //assigment operator
+  grad_stack_entry* e1 = gradient_structure::GRAD_STACK1->get_element(1);
+  ASSERT_EQ(&default_evaluation1, e1->func);
+  ASSERT_EQ(nullptr, e1->func2);
+  //(*(e1->func))();
+
+  ASSERT_EQ(nullptr, gradient_structure::GRAD_STACK1->get_element(2));
+}
