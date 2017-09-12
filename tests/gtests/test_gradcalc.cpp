@@ -402,7 +402,7 @@ TEST_F(test_gradcalc, split_cube_minus_square)
   ASSERT_EQ(8, gradient_structure::ARR_LIST1->get_last_offset());
   ASSERT_EQ(8, gradient_structure::ARR_LIST1->get_max_last_offset());
 }
-TEST_F(test_gradcalc, pow_manual_gradcalc)
+TEST_F(test_gradcalc, pow_gradcalc)
 {
   ad_exit=&test_ad_exit;
 
@@ -421,55 +421,90 @@ TEST_F(test_gradcalc, pow_manual_gradcalc)
 
   double f = value(result);
 
+  gradcalc(1, g);
+
+  ASSERT_DOUBLE_EQ(10.0, g(1));
+  ASSERT_DOUBLE_EQ(25.0, f);
+  //Gradient
+  ASSERT_DOUBLE_EQ(g(1), variables.elem(1).v->x);
+}
+TEST_F(test_gradcalc, pow_manual_gradcalc)
+{
+  ad_exit=&test_ad_exit;
+
+  dvector g(1, 1);
+  g(1) = 12345;
+
+  independent_variables x(1, 1);
+  x(1) = 5;
+
+  //Increases gradient_structure::instances.
+  gradient_structure gs;
+
+  dvar_vector variables(x);
+  ASSERT_DOUBLE_EQ(5.0, x(1));
+  ASSERT_DOUBLE_EQ(5.0, variables.elem(1).v->x);
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
+  dvariable result = pow(variables(1), 2.0);
+
+  double f = value(result);
+  ASSERT_DOUBLE_EQ(25.0, f);
+
   //Points at next available element.
   ASSERT_EQ(2, gradient_structure::GRAD_STACK1->ptr_index());
+  ASSERT_EQ(nullptr, gradient_structure::GRAD_STACK1->get_element(2));
 
   //from gradstack function in fvar_op5.cpp
 
-  //pow function
-  grad_stack_entry* e0 = gradient_structure::GRAD_STACK1->get_element(0);
-  ASSERT_EQ(nullptr, e0->func);
-  ASSERT_EQ(&default_evaluation, e0->func2);
-  ASSERT_DOUBLE_EQ(25.0, *e0->dep_addr);
-  ASSERT_DOUBLE_EQ(10.0, e0->mult1);
-  ASSERT_DOUBLE_EQ(5.0, *e0->ind_addr1);
-  ASSERT_DOUBLE_EQ(0.0, e0->mult2);
-  ASSERT_EQ(nullptr, e0->ind_addr2);
-
-  std::thread t1([e0]()
-  {
-    (*(e0->func2))(e0);
-  });
-  t1.join();
-
-  ASSERT_DOUBLE_EQ(0.0, *e0->dep_addr);
-  ASSERT_DOUBLE_EQ(10.0, e0->mult1);
-  ASSERT_DOUBLE_EQ(255.0, *e0->ind_addr1);
-  ASSERT_DOUBLE_EQ(0.0, e0->mult2);
-  ASSERT_EQ(nullptr, e0->ind_addr2);
-
-  //Gradient
-  ASSERT_DOUBLE_EQ(5.0, x(1));
-
   //assigment operator
   grad_stack_entry* e1 = gradient_structure::GRAD_STACK1->get_element(1);
+  *e1->dep_addr = 1.0;
+  *e1->ind_addr1 = 0.0;
   ASSERT_EQ(nullptr, e1->func);
   ASSERT_EQ(&default_evaluation1, e1->func2);
-  ASSERT_DOUBLE_EQ(25.0, *e1->dep_addr);
+  ASSERT_DOUBLE_EQ(1.0, *e1->dep_addr);
+  ASSERT_EQ(&value(result), e1->dep_addr);
   ASSERT_DOUBLE_EQ(0.0, *e1->ind_addr1);
+  //Return of pow
+  ASSERT_EQ(&value(gradient_structure::RETURN_PTR[0]), e1->ind_addr1);
   std::thread t2([e1]()
   {
     (*(e1->func2))(e1);
   });
   t2.join();
   ASSERT_DOUBLE_EQ(0.0, *e1->dep_addr);
-  ASSERT_DOUBLE_EQ(25.0, *e1->ind_addr1);
+  ASSERT_DOUBLE_EQ(1.0, *e1->ind_addr1);
   ASSERT_DOUBLE_EQ(0.0, e1->mult1);
   ASSERT_DOUBLE_EQ(0.0, e1->mult2);
   ASSERT_EQ(nullptr, e1->ind_addr2);
 
-  //Gradient
-  ASSERT_DOUBLE_EQ(5.0, x(1));
+  //pow function fvar_fn.cpp
+  grad_stack_entry* e0 = gradient_structure::GRAD_STACK1->get_element(0);
+  *e0->dep_addr = 1.0;
+  *e0->ind_addr1 = 0.0;
+  ASSERT_EQ(nullptr, e0->func);
+  ASSERT_EQ(&default_evaluation, e0->func2);
+  ASSERT_DOUBLE_EQ(1.0, *e0->dep_addr);
+  //Return of pow
+  ASSERT_EQ(&value(gradient_structure::RETURN_PTR[0]), e0->dep_addr);
+  ASSERT_DOUBLE_EQ(10.0, e0->mult1);
+  ASSERT_DOUBLE_EQ(0.0, *e0->ind_addr1);
+  ASSERT_EQ(&value(variables(1)), e0->ind_addr1);
+  ASSERT_DOUBLE_EQ(0.0, e0->mult2);
+  ASSERT_EQ(nullptr, e0->ind_addr2);
+  std::thread t1([e0]()
+  {
+    (*(e0->func2))(e0);
+  });
+  t1.join();
+  ASSERT_DOUBLE_EQ(0.0, *e0->dep_addr);
+  ASSERT_DOUBLE_EQ(10.0, e0->mult1);
+  ASSERT_DOUBLE_EQ(10.0, *e0->ind_addr1);
+  ASSERT_DOUBLE_EQ(0.0, e0->mult2);
+  ASSERT_EQ(nullptr, e0->ind_addr2);
 
-  ASSERT_EQ(nullptr, gradient_structure::GRAD_STACK1->get_element(2));
+  ASSERT_DOUBLE_EQ(5.0, x(1));
+  //Gradient
+  ASSERT_DOUBLE_EQ(10.0, variables.elem(1).v->x);
 }
