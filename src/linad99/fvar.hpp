@@ -351,7 +351,7 @@ class grad_stack_entry;
 void default_evaluation4ind(void);
 void default_evaluation(grad_stack_entry*);
 void default_evaluation0(void);
-void default_evaluation1(void);
+void default_evaluation1(grad_stack_entry*);
 void default_evaluation1m(void);
 void default_evaluation2(void);
 void default_evaluation3(void);
@@ -957,7 +957,9 @@ class grad_stack
 
    void set_gradient_stack0(void (*func) (void), double *dep_addr);
 
-   void set_gradient_stack1(void (*func) (void),
+   void set_gradient_stack1(void (*func)(void),
+     double *dep_addr, double *ind_addr1);
+   void set_gradient_stack1(void (*func)(grad_stack_entry*),
      double *dep_addr, double *ind_addr1);
 
    void set_gradient_stack2(void (*func) (void),
@@ -1063,9 +1065,11 @@ inline void grad_stack::set_gradient_stack(void (*func) (void),
    //   double * dep_addr,double * ind_addr1, double mult1, double * ind_addr2,
     //  double mult2);
 #endif
-inline void grad_stack::set_gradient_stack(void (*func) (grad_stack_entry*),
-  double *dep_addr, double *ind_addr1, double mult1, double *ind_addr2,
-  double mult2)
+inline void grad_stack::set_gradient_stack(
+  void (*func) (grad_stack_entry*),
+  double *dep_addr,
+  double *ind_addr1, double mult1,
+  double *ind_addr2, double mult2)
 {
 #ifdef NO_DERIVS
    if (!gradient_structure::no_derivatives)

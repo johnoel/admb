@@ -406,7 +406,7 @@ void reset_gradient_stack(void)
   \param dep_addr Address of dependent variable; pointer to double.
   \param ind_addr1 Address of independent variable; pointer to double
  */
-void grad_stack::set_gradient_stack1(void (* func)(void),
+void grad_stack::set_gradient_stack1(void (*func)(void),
   double* dep_addr, double* ind_addr1)
 {
 #ifdef NO_DERIVS
@@ -421,6 +421,30 @@ void grad_stack::set_gradient_stack1(void (* func)(void),
     }
     //test_the_pointer();
     ptr->func = func;
+    ptr->func2 = nullptr;
+    ptr->dep_addr = dep_addr;
+    ptr->ind_addr1 = ind_addr1;
+    ptr++;
+#ifdef NO_DERIVS
+  }
+#endif
+}
+void grad_stack::set_gradient_stack1(void (*func)(grad_stack_entry*),
+  double* dep_addr, double* ind_addr1)
+{
+#ifdef NO_DERIVS
+  if (!gradient_structure::no_derivatives)
+  {
+#endif
+    if (ptr > ptr_last)
+    {
+       // current buffer is full -- write it to disk and reset pointer
+       // and counter
+       this->write_grad_stack_buffer();
+    }
+    //test_the_pointer();
+    ptr->func = nullptr;
+    ptr->func2 = func;
     ptr->dep_addr = dep_addr;
     ptr->ind_addr1 = ind_addr1;
     ptr++;

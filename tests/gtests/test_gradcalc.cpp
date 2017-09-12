@@ -424,6 +424,8 @@ TEST_F(test_gradcalc, pow_manual_gradcalc)
   //Points at next available element.
   ASSERT_EQ(2, gradient_structure::GRAD_STACK1->ptr_index());
 
+  //from gradstack function in fvar_op5.cpp
+
   //pow function
   grad_stack_entry* e0 = gradient_structure::GRAD_STACK1->get_element(0);
   ASSERT_EQ(nullptr, e0->func);
@@ -451,9 +453,23 @@ TEST_F(test_gradcalc, pow_manual_gradcalc)
 
   //assigment operator
   grad_stack_entry* e1 = gradient_structure::GRAD_STACK1->get_element(1);
-  ASSERT_EQ(&default_evaluation1, e1->func);
-  ASSERT_EQ(nullptr, e1->func2);
-  //(*(e1->func))();
+  ASSERT_EQ(nullptr, e1->func);
+  ASSERT_EQ(&default_evaluation1, e1->func2);
+  ASSERT_DOUBLE_EQ(25.0, *e1->dep_addr);
+  ASSERT_DOUBLE_EQ(0.0, *e1->ind_addr1);
+  std::thread t2([e1]()
+  {
+    (*(e1->func2))(e1);
+  });
+  t2.join();
+  ASSERT_DOUBLE_EQ(0.0, *e1->dep_addr);
+  ASSERT_DOUBLE_EQ(25.0, *e1->ind_addr1);
+  ASSERT_DOUBLE_EQ(0.0, e1->mult1);
+  ASSERT_DOUBLE_EQ(0.0, e1->mult2);
+  ASSERT_EQ(nullptr, e1->ind_addr2);
+
+  //Gradient
+  ASSERT_DOUBLE_EQ(5.0, x(1));
 
   ASSERT_EQ(nullptr, gradient_structure::GRAD_STACK1->get_element(2));
 }

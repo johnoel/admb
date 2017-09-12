@@ -64,48 +64,51 @@
  * \param
  */
 void default_evaluation(grad_stack_entry* grad_ptr)
+{
+  // checks to see how many independent variables there are
+  double* zptr = grad_ptr->dep_addr;
+  double z = *zptr;
+  *zptr = 0.0;
+
+  // Check to see if first independent variable is a NULL adress
+  if (grad_ptr->ind_addr1)
   {
-    // checks to see how many independent variables there are
-    double * zptr = grad_ptr->dep_addr;
-    double z = *zptr;
-    *zptr = 0;
-    // Check to see if first independent variable is a NULL adress
-    if  ( grad_ptr->ind_addr1 )
-    {
-      * grad_ptr->ind_addr1 += z * grad_ptr->mult1 ;
-        //gradlog <<  setprecision(13) << * grad_ptr->ind_addr1  << endl;
-        //if (fabs(* grad_ptr->ind_addr1+XXX)<1.e-16)
-         // cout <<  setprecision(13) << * grad_ptr->ind_addr1  << endl;
+    *grad_ptr->ind_addr1 += z * grad_ptr->mult1;
+
+    //gradlog <<  setprecision(13) << * grad_ptr->ind_addr1  << endl;
+    //if (fabs(* grad_ptr->ind_addr1+XXX)<1.e-16)
+    // cout <<  setprecision(13) << * grad_ptr->ind_addr1  << endl;
+
 #if defined(USE_DDOUBLE)
-      if  ( grad_ptr->mult2 !=0)
+    if (grad_ptr->mult2 != 0)
 #else
-      if  (!ISZERO(grad_ptr->mult2))
+    if (!ISZERO(grad_ptr->mult2))
 #endif
-      {
-        * grad_ptr->ind_addr2 += z * grad_ptr->mult2 ;
-        //gradlog <<  setprecision(13) << * grad_ptr->ind_addr2  << endl;
-        //if (fabs(* grad_ptr->ind_addr2+XXX)<1.e-16)
-         // cout <<  setprecision(13) << * grad_ptr->ind_addr2  << endl;
-      }
+    {
+      *grad_ptr->ind_addr2 += z * grad_ptr->mult2;
+
+      //gradlog <<  setprecision(13) << * grad_ptr->ind_addr2  << endl;
+      //if (fabs(* grad_ptr->ind_addr2+XXX)<1.e-16)
+      // cout <<  setprecision(13) << * grad_ptr->ind_addr2  << endl;
     }
   }
-
+}
 /**
  * Description not yet available.
  * \param
  */
-  void default_evaluation1(void)
-  {
-    // there is one independent variable
-    grad_stack_entry * grad_ptr = gradient_structure::GRAD_STACK1->ptr;
-    double z = * grad_ptr->dep_addr;
-    * grad_ptr->dep_addr=0.;
-    * grad_ptr->ind_addr1 += z;
-    //gradlog <<  setprecision(13) << * grad_ptr->ind_addr1  << endl;
-    //if (fabs(* grad_ptr->ind_addr1+XXX)<1.e-16)
-    //cout << setscientific() <<  setprecision(13) << * grad_ptr->ind_addr1
-    //<< endl;
-  }
+void default_evaluation1(grad_stack_entry* grad_ptr)
+{
+  // there is one independent variable
+  double z = *grad_ptr->dep_addr;
+  *grad_ptr->dep_addr = 0.0;
+  *grad_ptr->ind_addr1 += z;
+
+  //gradlog <<  setprecision(13) << * grad_ptr->ind_addr1  << endl;
+  //if (fabs(* grad_ptr->ind_addr1+XXX)<1.e-16)
+  //cout << setscientific() <<  setprecision(13) << * grad_ptr->ind_addr1
+  //<< endl;
+}
 
 /**
  * Description not yet available.
