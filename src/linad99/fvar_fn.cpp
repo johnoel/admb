@@ -24,31 +24,33 @@
 #include <stdio.h>
 #include <math.h>
 
-void gradfree(dlink *);
-
 /**
- * Description not yet available.
- * \param
- */
-prevariable& pow(const prevariable& v1, const double u)
-    {
+Computes base raised to the power exp.
+
+\param base is a variable
+\param exp is constant double
+\return variable result
+*/
+prevariable& pow(const prevariable& base, const double exp)
+{
 #ifndef OPT_LIB
-        if (v1.v->x == 0)
-        {
-          cerr << "Error -- base = 0 in function"
-            " prevariable& pow(const prevariable& v1, const double u)" << endl;
-        }
+  if (base.v->x == 0)
+  {
+    cerr << "Error -- base = 0 in function"
+         << " prevariable& pow(const prevariable& base, const double exp)\n.";
+  }
 #endif
-      if (++gradient_structure::RETURN_PTR > gradient_structure::MAX_RETURN)
-        gradient_structure::RETURN_PTR = gradient_structure::MIN_RETURN;
-      double x,y;
-      x=::pow(v1.v->x,u-1);
-      y=x* v1.v->x;
-      gradient_structure::RETURN_PTR->v->x=y;
-      gradient_structure::GRAD_STACK1->set_gradient_stack(default_evaluation,
-        &(gradient_structure::RETURN_PTR->v->x), &(v1.v->x), u * x );
-      return(*gradient_structure::RETURN_PTR);
-    }
+  if (++gradient_structure::RETURN_PTR > gradient_structure::MAX_RETURN)
+    gradient_structure::RETURN_PTR = gradient_structure::MIN_RETURN;
+
+  double x = ::pow(base.v->x, exp - 1.0);
+  double y = x * base.v->x;
+  gradient_structure::RETURN_PTR->v->x = y;
+  gradient_structure::GRAD_STACK1->set_gradient_stack(default_evaluation,
+        &(gradient_structure::RETURN_PTR->v->x), &(base.v->x), exp * x );
+
+  return *gradient_structure::RETURN_PTR;
+}
 
 /**
  * Description not yet available.
