@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <fvar.hpp>
 #include <admodel.h>
+#include <thread>
 
 extern "C"
 {
@@ -427,7 +428,26 @@ TEST_F(test_gradcalc, pow_manual_gradcalc)
   grad_stack_entry* e0 = gradient_structure::GRAD_STACK1->get_element(0);
   ASSERT_EQ(nullptr, e0->func);
   ASSERT_EQ(&default_evaluation, e0->func2);
-  (*(e0->func2))(e0);
+  ASSERT_DOUBLE_EQ(25.0, *e0->dep_addr);
+  ASSERT_DOUBLE_EQ(10.0, e0->mult1);
+  ASSERT_DOUBLE_EQ(5.0, *e0->ind_addr1);
+  ASSERT_DOUBLE_EQ(0.0, e0->mult2);
+  ASSERT_EQ(nullptr, e0->ind_addr2);
+
+  std::thread t1([e0]()
+  {
+    (*(e0->func2))(e0);
+  });
+  t1.join();
+
+  ASSERT_DOUBLE_EQ(0.0, *e0->dep_addr);
+  ASSERT_DOUBLE_EQ(10.0, e0->mult1);
+  ASSERT_DOUBLE_EQ(255.0, *e0->ind_addr1);
+  ASSERT_DOUBLE_EQ(0.0, e0->mult2);
+  ASSERT_EQ(nullptr, e0->ind_addr2);
+
+  //Gradient
+  ASSERT_DOUBLE_EQ(5.0, x(1));
 
   //assigment operator
   grad_stack_entry* e1 = gradient_structure::GRAD_STACK1->get_element(1);
