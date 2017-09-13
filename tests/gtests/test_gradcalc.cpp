@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+#xinclude <gtest/gtest.h>
 #include <fvar.hpp>
 #include <admodel.h>
 #include <thread>
@@ -456,9 +456,9 @@ TEST_F(test_gradcalc, pow_manual_gradcalc)
   ASSERT_EQ(nullptr, gradient_structure::GRAD_STACK1->get_element(2));
 
   ///Begin Needed!!!
-  ASSERT_EQ(value(gradient_structure::RETURN_PTR[0]), 25.0);
+  ASSERT_DOUBLE_EQ(value(gradient_structure::RETURN_PTR[0]), 25.0);
   gradient_structure::GRAD_LIST->initialize();
-  ASSERT_EQ(value(gradient_structure::RETURN_PTR[0]), 0.0);
+  ASSERT_DOUBLE_EQ(value(gradient_structure::RETURN_PTR[0]), 0.0);
 
   double_and_int* ptr = (double_and_int*)gradient_structure::get_ARRAY_MEMBLOCK_BASE();
   ASSERT_DOUBLE_EQ(ptr->x, 5.0);
