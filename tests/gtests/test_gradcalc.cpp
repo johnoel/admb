@@ -8,7 +8,18 @@ extern "C"
   void test_ad_exit(const int exit_code);
 }
 
-class test_gradcalc: public ::testing::Test {};
+class test_gradcalc: public ::testing::Test
+{
+public:
+  void SetUp()
+  {
+    ad_comm::argc = 0;
+    ad_comm::argv = nullptr;
+  }
+  void TearDown()
+  {
+  }
+};
 
 TEST_F(test_gradcalc, nvar_zero)
 {
@@ -18,6 +29,7 @@ TEST_F(test_gradcalc, nvar_zero)
 
   ASSERT_EQ(0, gradient_structure::get_NVAR());
   ASSERT_EQ(0, gradient_structure::get_instances());
+
 
   ASSERT_ANY_THROW({
     gradcalc(1, g);
