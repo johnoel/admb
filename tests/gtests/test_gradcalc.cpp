@@ -455,7 +455,6 @@ TEST_F(test_gradcalc, pow_manual_gradcalc)
   ASSERT_EQ(2, gradient_structure::GRAD_STACK1->ptr_index());
   ASSERT_EQ(nullptr, gradient_structure::GRAD_STACK1->get_element(2));
 
-/*
   ///Begin Needed!!!
   ASSERT_DOUBLE_EQ(value(gradient_structure::RETURN_PTR[0]), 25.0);
   gradient_structure::GRAD_LIST->initialize();
@@ -470,7 +469,7 @@ TEST_F(test_gradcalc, pow_manual_gradcalc)
   grad_stack_entry* e1 = gradient_structure::GRAD_STACK1->get_element(1);
   *e1->dep_addr = 1.0;
   ASSERT_EQ(nullptr, e1->func);
-  ASSERT_EQ(&default_evaluation1, e1->func2);
+  //ASSERT_EQ(&default_evaluation1, e1->func2);
   ASSERT_DOUBLE_EQ(1.0, *e1->dep_addr);
   ASSERT_EQ(&value(result), e1->dep_addr);
   ASSERT_DOUBLE_EQ(0.0, *e1->ind_addr1);
@@ -490,7 +489,7 @@ TEST_F(test_gradcalc, pow_manual_gradcalc)
   //pow function fvar_fn.cpp
   grad_stack_entry* e0 = gradient_structure::GRAD_STACK1->get_element(0);
   ASSERT_EQ(nullptr, e0->func);
-  ASSERT_EQ(&default_evaluation, e0->func2);
+  //ASSERT_EQ(&default_evaluation, e0->func2);
   ASSERT_DOUBLE_EQ(1.0, *e0->dep_addr);
   //Return of pow
   ASSERT_EQ(&value(gradient_structure::RETURN_PTR[0]), e0->dep_addr);
@@ -513,7 +512,6 @@ TEST_F(test_gradcalc, pow_manual_gradcalc)
   ASSERT_DOUBLE_EQ(5.0, x(1));
   //Gradient
   ASSERT_DOUBLE_EQ(10.0, variables.elem(1).v->x);
-*/
 }
 TEST_F(test_gradcalc, square_gradcalc)
 {
