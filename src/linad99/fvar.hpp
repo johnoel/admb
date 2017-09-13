@@ -353,7 +353,7 @@ void default_evaluation(grad_stack_entry*);
 void default_evaluation0(void);
 void default_evaluation1(grad_stack_entry*);
 void default_evaluation1m(void);
-void default_evaluation2(void);
+void default_evaluation2(grad_stack_entry*);
 void default_evaluation3(void);
 void default_evaluation4(void);
 void default_evaluation4m(void);
