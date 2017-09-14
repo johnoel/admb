@@ -836,7 +836,7 @@ TEST_F(test_gradcalc, log_manual_gradcalc)
   //pow function fvar_fn.cpp
   grad_stack_entry* e0 = gradient_structure::GRAD_STACK1->get_element(0);
   ASSERT_EQ(nullptr, e0->func);
-  ASSERT_EQ(&default_evaluation, e0->func2);
+  ASSERT_TRUE(&default_evaluation == e0->func2);
   ASSERT_DOUBLE_EQ(1.0, *e0->dep_addr);
   //Return of pow
   ASSERT_EQ(&value(gradient_structure::RETURN_PTR[0]), e0->dep_addr);
