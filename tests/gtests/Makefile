@@ -104,6 +104,7 @@ GTESTS=\
  test_arr_list.cpp\
  test_arr_link.cpp\
  test_gradcalc.cpp\
+ test_simple.cpp\
  main.cpp
 
 ifeq ($(CXX),openCC)
