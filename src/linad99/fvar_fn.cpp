@@ -28,7 +28,7 @@
 Computes base raised to the power exp.
 
 \param base is a variable
-\param exp is constant double
+\param exp is constant value
 \return variable result
 */
 prevariable& pow(const prevariable& base, const double exp)
@@ -201,19 +201,24 @@ prevariable& cos(const prevariable& v1)
     }
 
 /**
- * Description not yet available.
- * \param
- */
+Computes the the natural (base e) logarithm of variable v1.
+
+\param v1 variable
+\return variable result
+*/
 prevariable& log(const prevariable& v1)
-    {
-      if (++gradient_structure::RETURN_PTR > gradient_structure::MAX_RETURN)
-        gradient_structure::RETURN_PTR = gradient_structure::MIN_RETURN;
-      gradient_structure::RETURN_PTR->v->x=::log(v1.v->x);
-      gradient_structure::GRAD_STACK1->set_gradient_stack(
-        default_evaluation,&(gradient_structure::RETURN_PTR->v->x),
-        &(v1.v->x),1./(v1.v->x) );
-      return(*gradient_structure::RETURN_PTR);
-    }
+{
+  if (++gradient_structure::RETURN_PTR > gradient_structure::MAX_RETURN)
+    gradient_structure::RETURN_PTR = gradient_structure::MIN_RETURN;
+
+  gradient_structure::RETURN_PTR->v->x = ::log(v1.v->x);
+  gradient_structure::GRAD_STACK1->set_gradient_stack(
+    default_evaluation,
+    &(gradient_structure::RETURN_PTR->v->x),
+    &(v1.v->x), 1.0 / v1.v->x);
+
+  return *gradient_structure::RETURN_PTR;
+}
 
 /**
  * Description not yet available.
