@@ -219,18 +219,21 @@ prevariable& log(const prevariable& v1)
 
   return *gradient_structure::RETURN_PTR;
 }
-
 /**
- * Description not yet available.
- * \param
- */
+Computes the common (base-10) logarithm of variable v1.
+
+\param v1 variable
+\return variable result
+*/
 prevariable& log10(const prevariable& v1)
-    {
-      if (++gradient_structure::RETURN_PTR > gradient_structure::MAX_RETURN)
-        gradient_structure::RETURN_PTR = gradient_structure::MIN_RETURN;
-      gradient_structure::RETURN_PTR->v->x=::log10(v1.v->x);
-      gradient_structure::GRAD_STACK1->set_gradient_stack(default_evaluation,
-        &(gradient_structure::RETURN_PTR->v->x),&(v1.v->x),
-        1./(v1.v->x)/2.3025851);
-      return(*gradient_structure::RETURN_PTR);
-    }
+{
+  if (++gradient_structure::RETURN_PTR > gradient_structure::MAX_RETURN)
+    gradient_structure::RETURN_PTR = gradient_structure::MIN_RETURN;
+
+  gradient_structure::RETURN_PTR->v->x =  std::log10(v1.v->x);
+  gradient_structure::GRAD_STACK1->set_gradient_stack(default_evaluation,
+    &(gradient_structure::RETURN_PTR->v->x),
+    &(v1.v->x), 1.0 / (v1.v->x * std::log(10)));
+
+  return *gradient_structure::RETURN_PTR;
+}
