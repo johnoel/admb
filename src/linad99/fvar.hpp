@@ -350,12 +350,12 @@ while (cntrl.ireturn >= 0) \
 class grad_stack_entry;
 void default_evaluation4ind(void);
 void default_evaluation(grad_stack_entry*);
-void default_evaluation0(void);
+void default_evaluation0(grad_stack_entry*);
 void default_evaluation1(grad_stack_entry*);
 void default_evaluation1m(void);
 void default_evaluation2(grad_stack_entry*);
 void default_evaluation3(void);
-void default_evaluation4(void);
+void default_evaluation4(grad_stack_entry*);
 void default_evaluation4m(void);
 
 void myheapcheck(char *);
@@ -956,6 +956,7 @@ class grad_stack
      double *ind_addr2);
 
    void set_gradient_stack0(void (*func) (void), double *dep_addr);
+   void set_gradient_stack0(void (*func) (grad_stack_entry*), double *dep_addr);
 
    void set_gradient_stack1(void (*func)(void),
      double *dep_addr, double *ind_addr1);
@@ -966,6 +967,9 @@ class grad_stack
      double *dep_addr, double *ind_addr1, double mult1);
 
    void set_gradient_stack4(void (*func) (void),
+     double *dep_addr, double *ind_addr1,
+     double *ind_addr2);
+   void set_gradient_stack4(void (*func) (grad_stack_entry*),
      double *dep_addr, double *ind_addr1,
      double *ind_addr2);
 
@@ -1249,6 +1253,30 @@ inline void grad_stack::set_gradient_stack4(void (*func) (void),
          this->write_grad_stack_buffer();
       }
       ptr->func = func;
+      ptr->func2 = nullptr;
+      ptr->dep_addr = dep_addr;
+      ptr->ind_addr1 = ind_addr1;
+      ptr->ind_addr2 = ind_addr2;
+      ptr++;
+#ifdef NO_DERIVS
+   }
+#endif
+}
+inline void grad_stack::set_gradient_stack4(void (*func) (grad_stack_entry*),
+  double *dep_addr, double *ind_addr1, double *ind_addr2)
+{
+#ifdef NO_DERIVS
+   if (!gradient_structure::no_derivatives)
+   {
+#endif
+      if (ptr > ptr_last)
+      {
+         // current buffer is full -- write it to disk and reset pointer
+         // and counter
+         this->write_grad_stack_buffer();
+      }
+      ptr->func = nullptr;
+      ptr->func2 = func;
       ptr->dep_addr = dep_addr;
       ptr->ind_addr1 = ind_addr1;
       ptr->ind_addr2 = ind_addr2;

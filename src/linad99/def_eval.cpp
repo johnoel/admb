@@ -130,11 +130,11 @@ void default_evaluation1(grad_stack_entry* grad_ptr)
  * Description not yet available.
  * \param
  */
-  void default_evaluation0(void)
-  {
-    // there is one independent variable
-    * gradient_structure::GRAD_STACK1->ptr->dep_addr=0.;
-  }
+void default_evaluation0(grad_stack_entry* grad_ptr)
+{
+  // there is one independent variable
+  *grad_ptr->dep_addr=0.;
+}
 
 /**
  * Description not yet available.
@@ -258,15 +258,14 @@ void default_evaluation2(grad_stack_entry* grad_ptr)
  * Description not yet available.
  * \param
  */
-  void default_evaluation4(void)
-  {
-    // there are two independent variables
-    grad_stack_entry * grad_ptr = gradient_structure::GRAD_STACK1->ptr;
-    double z = * grad_ptr->dep_addr;
-    * grad_ptr->dep_addr=0.;
-    * grad_ptr->ind_addr1 += z;
-    * grad_ptr->ind_addr2 += z;
-  }
+void default_evaluation4(grad_stack_entry* grad_ptr)
+{
+  // there are two independent variables
+  double z = *grad_ptr->dep_addr;
+  *grad_ptr->dep_addr = 0.0;
+  *grad_ptr->ind_addr1 += z;
+  *grad_ptr->ind_addr2 += z;
+}
 
 /**
  * Description not yet available.

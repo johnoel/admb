@@ -110,10 +110,14 @@ class gradient_structure
    static humungous_pointer ARRAY_MEMBLOCK_BASE;
    static humungous_pointer ARRAY_MEMBLOCK_SAVE;
  public:
-   static double *get_ARRAY_MEMBLOCK_BASE()
-   {
-      return (double*)ARRAY_MEMBLOCK_BASE;
-   }
+  static double* get_ARRAY_MEMBLOCK_BASE()
+  {
+    return (double*)ARRAY_MEMBLOCK_BASE;
+  }
+  static indvar_offset_list* get_INDVAR_LIST()
+  {
+    return INDVAR_LIST;
+  }
  private:
 #ifdef __BORLANDC__
    static long int CMPDIF_BUFFER_SIZE;
@@ -127,7 +131,7 @@ class gradient_structure
    static int save_var_flag;
 
    static unsigned int MAX_DLINKS;
-   static indvar_offset_list *INDVAR_LIST;
+   static indvar_offset_list* INDVAR_LIST;
    static int NUM_DEPENDENT_VARIABLES;
    static dependent_variables_information *DEPVARS_INFO;
 

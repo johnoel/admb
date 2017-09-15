@@ -524,6 +524,27 @@ void grad_stack::set_gradient_stack0(void (* func)(void),double * dep_addr)
       this->write_grad_stack_buffer();
     }
     ptr->func = func;
+    ptr->func2 = nullptr;
+    ptr->dep_addr = dep_addr;
+    ptr++;
+#ifdef NO_DERIVS
+  }
+#endif
+}
+void grad_stack::set_gradient_stack0(void (*func)(grad_stack_entry*),double * dep_addr)
+{
+#ifdef NO_DERIVS
+  if (!gradient_structure::no_derivatives)
+  {
+#endif
+    if (ptr > ptr_last)
+    {
+      // current buffer is full -- write it to disk and reset pointer
+      // and counter
+      this->write_grad_stack_buffer();
+    }
+    ptr->func = nullptr;
+    ptr->func2 = func;
     ptr->dep_addr = dep_addr;
     ptr++;
 #ifdef NO_DERIVS

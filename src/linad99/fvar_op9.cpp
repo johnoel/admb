@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <math.h>
 
-  void df_plus_eq_pvpv(void);
+void df_plus_eq_pvpv(grad_stack_entry* grad_ptr);
   //extern ofstream gradlog;
 
 /**
@@ -43,7 +43,7 @@ void prevariable::operator+=(const prevariable& v1)
  * Description not yet available.
  * \param
  */
-  void df_plus_eq_pvpv(void)
+void df_plus_eq_pvpv(grad_stack_entry* grad_ptr)
   {
     //cout <<  setprecision(13) <<
      //  * gradient_structure::GRAD_STACK1->ptr->ind_addr1 << endl;
@@ -54,8 +54,8 @@ void prevariable::operator+=(const prevariable& v1)
     //gradlog <<  setprecision(13) <<
      //  * gradient_structure::GRAD_STACK1->ptr->ind_addr1 << endl;
 
-    * gradient_structure::GRAD_STACK1->ptr->ind_addr1
-               += * gradient_structure::GRAD_STACK1->ptr->dep_addr;
+    *grad_ptr->ind_addr1 += *grad_ptr->dep_addr;
+
     //gradlog <<  setprecision(13) <<
      //  * gradient_structure::GRAD_STACK1->ptr->ind_addr1 << endl;
   }
