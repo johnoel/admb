@@ -213,90 +213,195 @@ TEST_F(test_simple, sum_ax_b_manual)
   ASSERT_DOUBLE_EQ(10.0, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
   ASSERT_DOUBLE_EQ(expected, f);
 }
-/*
-TEST_F(test_simple, log_manual_simple)
+TEST_F(test_simple, sum_ax_b_thread)
 {
   ad_exit=&test_ad_exit;
 
-  dvector g(1, 1);
-  g(1) = 12345;
-
-  independent_variables x(1, 1);
-  x(1) = 5;
-
   //Increases gradient_structure::instances.
+  independent_variables independants(1, 2);
+  independants(1) = 5;
+  independants(2) = 10;
+
   gradient_structure gs;
-
-  dvar_vector variables(x);
-  ASSERT_DOUBLE_EQ(5.0, x(1));
-  ASSERT_DOUBLE_EQ(5.0, variables.elem(1).v->x);
-
+  dvar_vector variables(independants);
+  
   ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
-  dvariable result = log(variables(1));
+  dvariable result = 0;
+  ASSERT_EQ(1, gradient_structure::GRAD_STACK1->ptr_index());
+
+  double expected = 0;
+  int index = 1; 
+  for (int i = 1; i <= 10; ++i)
+  {
+    ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
+
+    //ax + b
+    result += variables(1) * x(i) + variables(2);
+    expected += independants(1) * x(i) + independants(2);
+
+    index += 3;
+    ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
+  }
 
   double f = value(result);
-  ASSERT_DOUBLE_EQ(std::log(x(1)), f);
+  ASSERT_EQ(index, 31);
+  ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
 
-  //Points at next available element.
-  ASSERT_EQ(2, gradient_structure::GRAD_STACK1->ptr_index());
-  ASSERT_EQ(nullptr, gradient_structure::GRAD_STACK1->get_element(2));
+  dvector g(1, 2);
+  g.initialize();
 
-  ///Begin Needed!!!
-  ASSERT_DOUBLE_EQ(value(gradient_structure::RETURN_PTR[0]), f);
   gradient_structure::GRAD_LIST->initialize();
   ASSERT_DOUBLE_EQ(value(gradient_structure::RETURN_PTR[0]), 0.0);
 
-  double_and_int* ptr = (double_and_int*)gradient_structure::get_ARRAY_MEMBLOCK_BASE();
-  ASSERT_DOUBLE_EQ(ptr->x, 5.0);
-  ptr->x = 0.0;
-  ///End Needed!!!
+  double_and_int* tmp =
+    (double_and_int*)gradient_structure::get_ARRAY_MEMBLOCK_BASE();
 
-  //assigment operator
-  grad_stack_entry* e1 = gradient_structure::GRAD_STACK1->get_element(1);
-  *e1->dep_addr = 1.0;
-  ASSERT_EQ(nullptr, e1->func);
-  ASSERT_EQ(&default_evaluation1, e1->func2);
-  ASSERT_DOUBLE_EQ(1.0, *e1->dep_addr);
-  ASSERT_EQ(&value(result), e1->dep_addr);
-  ASSERT_DOUBLE_EQ(0.0, *e1->ind_addr1);
-  //Return of pow
-  ASSERT_EQ(&value(gradient_structure::RETURN_PTR[0]), e1->ind_addr1);
-  std::thread t2([e1]()
+  unsigned long int imax = gradient_structure::ARR_LIST1->get_max_last_offset() / sizeof(double_and_int);
+  for (unsigned int i = 0; i < imax; ++i)
   {
-    (*(e1->func2))(e1);
-  });
-  t2.join();
-  ASSERT_DOUBLE_EQ(0.0, *e1->dep_addr);
-  ASSERT_DOUBLE_EQ(1.0, *e1->ind_addr1);
-  ASSERT_DOUBLE_EQ(0.0, e1->mult1);
-  ASSERT_DOUBLE_EQ(0.0, e1->mult2);
-  ASSERT_EQ(nullptr, e1->ind_addr2);
+    tmp->x = 0.0;
+    ++tmp;
+  }
 
-  //pow function fvar_fn.cpp
-  grad_stack_entry* e0 = gradient_structure::GRAD_STACK1->get_element(0);
-  ASSERT_EQ(nullptr, e0->func);
-  //ASSERT_EQ(&default_evaluation, e0->func2);
-  ASSERT_DOUBLE_EQ(1.0, *e0->dep_addr);
-  //Return of pow
-  ASSERT_EQ(&value(gradient_structure::RETURN_PTR[0]), e0->dep_addr);
-  ASSERT_DOUBLE_EQ(0.2, e0->mult1);
-  ASSERT_DOUBLE_EQ(0.0, *e0->ind_addr1);
-  ASSERT_EQ(&value(variables(1)), e0->ind_addr1);
-  ASSERT_DOUBLE_EQ(0.0, e0->mult2);
-  ASSERT_EQ(nullptr, e0->ind_addr2);
-  std::thread t1([e0]()
+  //gradcalc(2, g);
+ 
+  int icount = 0;
+  int element_index = 30;
+  while (element_index >= 0)
   {
-    (*(e0->func2))(e0);
-  });
-  t1.join();
-  ASSERT_DOUBLE_EQ(0.0, *e0->dep_addr);
-  ASSERT_DOUBLE_EQ(0.2, e0->mult1);
-  ASSERT_DOUBLE_EQ(0.2, *e0->ind_addr1);
-  ASSERT_DOUBLE_EQ(0.0, e0->mult2);
-  ASSERT_EQ(nullptr, e0->ind_addr2);
+    grad_stack_entry* element =
+      gradient_structure::GRAD_STACK1->get_element(element_index);
+    *element->dep_addr = 1.0;
 
-  ASSERT_DOUBLE_EQ(5.0, x(1));
-  //Gradient
-  ASSERT_DOUBLE_EQ(1.0 / x(1), variables.elem(1).v->x);
+    cout << "Begin *dep_addr: " << *element->dep_addr << endl;
+    cout << "Begin *ind_addr1: ";
+    if (element->ind_addr1)
+    {
+      cout << *element->ind_addr1;
+    }
+    cout << endl;
+    cout << "Begin mult1: " << element->mult1<< endl;
+    cout << "Begin mult2: " << element->mult2 << endl;
+    if (element->func != nullptr)
+    {
+      (*(element->func))();
+      ASSERT_TRUE(false);
+    }
+    else if (element->func2 != nullptr)
+    {
+      std::thread t([element]()
+      {
+        (*(element->func2))(element);
+      });
+      t.join();
+    }
+    cout << "End *dep_addr: " << *element->dep_addr << endl;
+    cout << "End *ind_addr1: ";
+    if (element->ind_addr1)
+    {
+      cout << *element->ind_addr1;
+    }
+    cout << endl;
+    cout << "End mult1: " << element->mult1<< endl;
+    cout << "End mult2: " << element->mult2 << endl;
+
+    --element_index;
+
+    cout << "icount: " << icount++ << endl;
+  }
+
+  ASSERT_DOUBLE_EQ(sum(x), *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
+  ASSERT_DOUBLE_EQ(10.0, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
+  ASSERT_DOUBLE_EQ(expected, f);
 }
-*/
+TEST_F(test_simple, sum_ax_b_Checkreturns)
+{
+  ad_exit=&test_ad_exit;
+
+  //Increases gradient_structure::instances.
+  independent_variables independants(1, 2);
+  independants(1) = 5;
+  independants(2) = 10;
+
+  gradient_structure gs;
+  dvar_vector variables(independants);
+  
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
+  dvariable result = 0;
+  ASSERT_EQ(1, gradient_structure::GRAD_STACK1->ptr_index());
+
+  double expected = 0;
+  int index = 1; 
+  for (int i = 1; i <= 10; ++i)
+  {
+    ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
+
+    //ax + b
+    result += variables(1) * x(i) + variables(2);
+    expected += independants(1) * x(i) + independants(2);
+
+    index += 3;
+    ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
+  }
+
+  double f = value(result);
+  ASSERT_EQ(index, 31);
+  ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
+
+  dvector g(1, 2);
+  g.initialize();
+
+  gradient_structure::GRAD_LIST->initialize();
+  ASSERT_DOUBLE_EQ(value(gradient_structure::RETURN_PTR[0]), 0.0);
+
+  double_and_int* tmp =
+    (double_and_int*)gradient_structure::get_ARRAY_MEMBLOCK_BASE();
+
+  unsigned long int imax = gradient_structure::ARR_LIST1->get_max_last_offset() / sizeof(double_and_int);
+  for (unsigned int i = 0; i < imax; ++i)
+  {
+    tmp->x = 0.0;
+    ++tmp;
+  }
+
+  //gradcalc(2, g);
+
+  int xi = 10;
+  double grad0 = 0.0;
+  double grad1 = 0.0;
+  for (int i = 30; i > 0; i -= 3)
+  {
+    grad_stack_entry* a = gradient_structure::GRAD_STACK1->get_element(i);
+    *a->dep_addr = 1.0;
+    std::thread t1([a]()
+    {
+      (*(a->func2))(a);
+    });
+    t1.join();
+    ASSERT_DOUBLE_EQ(grad0, *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
+    ASSERT_DOUBLE_EQ(grad1, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
+    grad_stack_entry* b = gradient_structure::GRAD_STACK1->get_element(i - 1);
+    *b->dep_addr = 1.0;
+    std::thread t2([b]()
+    {
+      (*(b->func2))(b);
+    });
+    t2.join();
+    grad1 += 1.0;
+    ASSERT_DOUBLE_EQ(grad0, *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
+    ASSERT_DOUBLE_EQ(grad1, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
+    grad_stack_entry* c = gradient_structure::GRAD_STACK1->get_element(i - 2);
+    *c->dep_addr = 1.0;
+    std::thread t3([c]()
+    {
+      (*(c->func2))(c);
+    });
+    t3.join();
+    grad0 += x(xi);
+    --xi;
+    ASSERT_DOUBLE_EQ(grad0, *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
+    ASSERT_DOUBLE_EQ(grad1, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
+  }
+
+  ASSERT_DOUBLE_EQ(expected, f);
+}
