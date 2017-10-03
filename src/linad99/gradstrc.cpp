@@ -746,3 +746,8 @@ void memory_allocate_error(const char * s, void * ptr)
       }
       NUM_DEPENDENT_VARIABLES=i;
     }
+
+double* gradient_structure::get_RETURN_ARRAYS(unsigned int i, unsigned int j)
+{
+  return &RETURN_ARRAYS[i][j].v->x;
+}

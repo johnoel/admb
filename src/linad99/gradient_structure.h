@@ -110,6 +110,7 @@ class gradient_structure
    static humungous_pointer ARRAY_MEMBLOCK_BASE;
    static humungous_pointer ARRAY_MEMBLOCK_SAVE;
  public:
+  static double* get_RETURN_ARRAYS(unsigned int i, unsigned int j);
   static double* get_ARRAY_MEMBLOCK_BASE()
   {
     return (double*)ARRAY_MEMBLOCK_BASE;
