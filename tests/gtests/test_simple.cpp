@@ -366,6 +366,7 @@ TEST_F(test_simple, sum_ax_b_Checkreturns)
 
   //gradcalc(2, g);
 
+  unsigned int arrayindex = 20;
   int xi = 10;
   double grad0 = 0.0;
   double grad1 = 0.0;
@@ -383,6 +384,8 @@ cout << __FILE__ << ':' << __LINE__ << endl;
     t1.join();
     ASSERT_DOUBLE_EQ(1.0, *a->ind_addr1);
     ASSERT_TRUE(a->ind_addr1 != gradient_structure::get_INDVAR_LIST()->get_address(0));
+    ASSERT_TRUE(a->ind_addr1 == gradient_structure::get_RETURN_ARRAYS(0, arrayindex));
+    --arrayindex;
     ASSERT_TRUE(a->ind_addr2 == NULL);
     ASSERT_DOUBLE_EQ(grad0, *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
     ASSERT_DOUBLE_EQ(grad1, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
@@ -395,6 +398,8 @@ cout << __FILE__ << ':' << __LINE__ << endl;
     t2.join();
     grad1 += 1.0;
     ASSERT_TRUE(b->ind_addr1 != gradient_structure::get_INDVAR_LIST()->get_address(0));
+    ASSERT_TRUE(b->ind_addr1 == gradient_structure::get_RETURN_ARRAYS(0, arrayindex));
+    --arrayindex;
     ASSERT_TRUE(b->ind_addr2 == gradient_structure::get_INDVAR_LIST()->get_address(1));
     ASSERT_DOUBLE_EQ(grad0, *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
     ASSERT_DOUBLE_EQ(grad1, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
@@ -407,8 +412,8 @@ cout << __FILE__ << ':' << __LINE__ << endl;
     t3.join();
     grad0 += x(xi);
     --xi;
-    ASSERT_TRUE(c->ind_addr2 == NULL);
     ASSERT_TRUE(c->ind_addr1 == gradient_structure::get_INDVAR_LIST()->get_address(0));
+    ASSERT_TRUE(c->ind_addr2 == NULL);
     ASSERT_TRUE(c->ind_addr2 != gradient_structure::get_INDVAR_LIST()->get_address(1));
     ASSERT_DOUBLE_EQ(grad0, *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
     ASSERT_DOUBLE_EQ(grad1, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
