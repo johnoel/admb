@@ -383,33 +383,44 @@ cout << __FILE__ << ':' << __LINE__ << endl;
     });
     t1.join();
     ASSERT_DOUBLE_EQ(1.0, *a->ind_addr1);
+    ASSERT_DOUBLE_EQ(1.0, *a->dep_addr);
     ASSERT_TRUE(a->ind_addr1 == gradient_structure::get_RETURN_ARRAYS(0, arrayindex));
     --arrayindex;
     ASSERT_TRUE(a->ind_addr2 == NULL);
     ASSERT_DOUBLE_EQ(grad0, *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
     ASSERT_DOUBLE_EQ(grad1, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
+
     grad_stack_entry* b = gradient_structure::GRAD_STACK1->get_element(i - 1);
     *b->dep_addr = 1.0;
+    ASSERT_DOUBLE_EQ(0.0, *b->ind_addr1);
+    ASSERT_DOUBLE_EQ(grad1, *b->ind_addr2);
     std::thread t2([b]()
     {
       (*(b->func2))(b);
     });
     t2.join();
     grad1 += 1.0;
+    ASSERT_DOUBLE_EQ(0.0, *b->dep_addr);
+    ASSERT_DOUBLE_EQ(1.0, *b->ind_addr1);
+    ASSERT_DOUBLE_EQ(grad1, *b->ind_addr2);
     ASSERT_TRUE(b->ind_addr1 == gradient_structure::get_RETURN_ARRAYS(0, arrayindex));
     --arrayindex;
     ASSERT_TRUE(b->ind_addr2 == gradient_structure::get_INDVAR_LIST()->get_address(1));
     ASSERT_DOUBLE_EQ(grad0, *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
     ASSERT_DOUBLE_EQ(grad1, *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
+
     grad_stack_entry* c = gradient_structure::GRAD_STACK1->get_element(i - 2);
     *c->dep_addr = 1.0;
+    ASSERT_DOUBLE_EQ(grad0, *c->ind_addr1);
     std::thread t3([c]()
     {
       (*(c->func2))(c);
     });
     t3.join();
+    ASSERT_DOUBLE_EQ(0.0, *c->dep_addr);
     grad0 += x(xi);
     --xi;
+    ASSERT_DOUBLE_EQ(grad0, *c->ind_addr1);
     ASSERT_TRUE(c->ind_addr1 == gradient_structure::get_INDVAR_LIST()->get_address(0));
     ASSERT_TRUE(c->ind_addr2 == NULL);
     ASSERT_DOUBLE_EQ(grad0, *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
