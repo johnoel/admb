@@ -872,9 +872,12 @@ class grad_stack_entry
    void (*func) (void);
    void (*func2)(grad_stack_entry*);
    double *dep_addr;    ///< Pointer to dependent variable
+   double dep_value;
    double *ind_addr1;   ///< Pointer to first independent variable
+   double ind_value1;
    double mult1;        ///< First mutiplicand in chain rule multipication
    double *ind_addr2;   ///< Pointer to second independent variable
+   double ind_value2;
    double mult2;        ///< Second mutiplicand in chain rule multipication
  public:
    friend void gradcalc(int nvar, const dvector & g);
@@ -1321,21 +1324,22 @@ inline void grad_stack::set_gradient_stack(void (*func) (void))
  */
 class indvar_offset_list
 {
-   // The number of independent variables
-   int nvar;
-   double **address;
+  // The number of independent variables
+  int nvar;
+  double** address;
 
- public:
-   friend class gradient_structure;
-   inline double *get_address(const int &i)
-   {
-      return address[i];
-   }
-   void put_address(unsigned int &i, double *iaddress)
-   {
-      address[i] = iaddress;
-      //  cerr << "In put_address i = " << i << "\n";
-   }
+public:
+  inline double* get_address(const int& i)
+  {
+    return address[i];
+  }
+  void put_address(unsigned int& i, double* iaddress)
+  {
+    //cerr << "In put_address i = " << i << "\n";
+    address[i] = iaddress;
+  }
+
+  friend class gradient_structure;
 };
 
 void gradfree(dlink *);
