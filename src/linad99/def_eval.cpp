@@ -150,7 +150,8 @@ void default_evaluation2(grad_stack_entry* grad_ptr)
   //cin >> ch;
   double z = *grad_ptr->dep_addr;
   *grad_ptr->dep_addr = 0.0;
-  *grad_ptr->ind_addr1 += z * grad_ptr->mult1;
+  grad_ptr->ind_value1 = z * grad_ptr->mult1;
+  *grad_ptr->ind_addr1 += grad_ptr->ind_value1;
   //gradlog <<  setprecision(13) << * grad_ptr->ind_addr1  << endl;
   //if (fabs(* grad_ptr->ind_addr1+XXX)<1.e-16)
   //cout <<  setprecision(13) << * grad_ptr->ind_addr1  << endl;
