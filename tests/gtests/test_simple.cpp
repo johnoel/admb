@@ -494,7 +494,7 @@ TEST_F(test_simple, sum_ax_b_threading)
       ASSERT_DOUBLE_EQ(1.0, *a->dep_addr);
       ASSERT_DOUBLE_EQ(0.0, a->ind_value1);
       (*(a->func2))(a);
-      ASSERT_DOUBLE_EQ(1.0, a->ind_value1);
+      ASSERT_DOUBLE_EQ(0.0, a->ind_value1);
       ASSERT_DOUBLE_EQ(1.0, *a->dep_addr);
       ASSERT_TRUE(a->ind_addr1 == gradient_structure::get_RETURN_ARRAYS(0, arrayindex));
       ASSERT_TRUE(a->ind_addr2 == NULL);
@@ -507,8 +507,8 @@ TEST_F(test_simple, sum_ax_b_threading)
       ASSERT_DOUBLE_EQ(0.0, b->ind_value2);
       (*(b->func2))(b);
       ASSERT_DOUBLE_EQ(0.0, *b->dep_addr);
-      ASSERT_DOUBLE_EQ(1.0, b->ind_value1);
-      ASSERT_DOUBLE_EQ(1.0, b->ind_value2);
+      ASSERT_DOUBLE_EQ(0.0, b->ind_value1);
+      ASSERT_DOUBLE_EQ(0.0, b->ind_value2);
       ASSERT_TRUE(b->ind_addr1 == gradient_structure::get_RETURN_ARRAYS(0, arrayindex - 1));
       ASSERT_TRUE(b->ind_addr2 == gradient_structure::get_INDVAR_LIST()->get_address(1));
 
