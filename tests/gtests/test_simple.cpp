@@ -507,8 +507,8 @@ TEST_F(test_simple, sum_ax_b_threading)
       ASSERT_DOUBLE_EQ(0.0, b->ind_value2);
       (*(b->func2))(b);
       ASSERT_DOUBLE_EQ(0.0, *b->dep_addr);
-      ASSERT_DOUBLE_EQ(0.0, b->ind_value1);
-      ASSERT_DOUBLE_EQ(0.0, b->ind_value2);
+      ASSERT_DOUBLE_EQ(1.0, b->ind_value1);
+      ASSERT_DOUBLE_EQ(1.0, b->ind_value2);
       ASSERT_TRUE(b->ind_addr1 == gradient_structure::get_RETURN_ARRAYS(0, arrayindex - 1));
       ASSERT_TRUE(b->ind_addr2 == gradient_structure::get_INDVAR_LIST()->get_address(1));
 
@@ -528,5 +528,31 @@ TEST_F(test_simple, sum_ax_b_threading)
   {
     t.join();
   });
+  double grad0 = 0.0;
+  double* grad_ptr0 = gradient_structure::get_INDVAR_LIST()->get_address(0);
+  double grad1 = 0.0;
+  double* grad_ptr1 = gradient_structure::get_INDVAR_LIST()->get_address(1);
+  for (int i = 30; i > 0; --i)
+  {
+    grad_stack_entry* gs = gradient_structure::GRAD_STACK1->get_element(i);
+    if (gs->ind_addr1 == grad_ptr0)
+    {
+      grad0 += gs->ind_value1;
+    }
+    if (gs->ind_addr2 == grad_ptr0)
+    {
+      grad0 += gs->ind_value2;
+    }
+    if (gs->ind_addr1 == grad_ptr1)
+    {
+      grad1 += gs->ind_value1;
+    }
+    if (gs->ind_addr2 == grad_ptr1)
+    {
+      grad1 += gs->ind_value2;
+    }
+  }
+  ASSERT_DOUBLE_EQ(grad1, x.size());
+  ASSERT_DOUBLE_EQ(grad0, sum(x));
   ASSERT_DOUBLE_EQ(expected, f);
 }

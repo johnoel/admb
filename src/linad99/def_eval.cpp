@@ -265,7 +265,9 @@ void default_evaluation4(grad_stack_entry* grad_ptr)
   double z = *grad_ptr->dep_addr;
   *grad_ptr->dep_addr = 0.0;
   *grad_ptr->ind_addr1 += z;
+  grad_ptr->ind_value1 = z;
   *grad_ptr->ind_addr2 += z;
+  grad_ptr->ind_value2 = z;
 }
 
 /**
