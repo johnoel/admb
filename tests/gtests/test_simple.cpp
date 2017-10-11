@@ -52,7 +52,7 @@ TEST_F(test_simple, ax_b_simple)
   gradient_structure gs;
 
   dvar_vector variables(independants);
-  
+
   ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
   //ax + b
   dvariable result = variables(1) * x(1) + variables(2);
@@ -82,13 +82,13 @@ TEST_F(test_simple, sum_ax_b_gradcalc)
 
   gradient_structure gs;
   dvar_vector variables(independants);
-  
+
   ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
   dvariable result = 0;
   ASSERT_EQ(1, gradient_structure::GRAD_STACK1->ptr_index());
 
   double expected = 0;
-  int index = 1; 
+  int index = 1;
   for (int i = 1; i <= 10; ++i)
   {
     ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
@@ -127,13 +127,13 @@ TEST_F(test_simple, sum_ax_b_manual)
 
   gradient_structure gs;
   dvar_vector variables(independants);
-  
+
   ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
   dvariable result = 0;
   ASSERT_EQ(1, gradient_structure::GRAD_STACK1->ptr_index());
 
   double expected = 0;
-  int index = 1; 
+  int index = 1;
   for (int i = 1; i <= 10; ++i)
   {
     ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
@@ -167,7 +167,7 @@ TEST_F(test_simple, sum_ax_b_manual)
   }
 
   //gradcalc(2, g);
- 
+
   int icount = 0;
   int element_index = 30;
   while (element_index >= 0)
@@ -224,13 +224,13 @@ TEST_F(test_simple, sum_ax_b_thread)
 
   gradient_structure gs;
   dvar_vector variables(independants);
-  
+
   ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
   dvariable result = 0;
   ASSERT_EQ(1, gradient_structure::GRAD_STACK1->ptr_index());
 
   double expected = 0;
-  int index = 1; 
+  int index = 1;
   for (int i = 1; i <= 10; ++i)
   {
     ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
@@ -264,7 +264,7 @@ TEST_F(test_simple, sum_ax_b_thread)
   }
 
   //gradcalc(2, g);
- 
+
   int icount = 0;
   int element_index = 30;
   while (element_index >= 0)
@@ -325,13 +325,13 @@ TEST_F(test_simple, sum_ax_b_Checkreturns)
 
   gradient_structure gs;
   dvar_vector variables(independants);
-  
+
   ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
   dvariable result = 0;
   ASSERT_EQ(1, gradient_structure::GRAD_STACK1->ptr_index());
 
   double expected = 0;
-  int index = 1; 
+  int index = 1;
   for (int i = 1; i <= 10; ++i)
   {
     ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
@@ -441,13 +441,13 @@ TEST_F(test_simple, sum_ax_b_threading)
 
   gradient_structure gs;
   dvar_vector variables(independants);
-  
+
   ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
   dvariable result = 0;
   ASSERT_EQ(1, gradient_structure::GRAD_STACK1->ptr_index());
 
   double expected = 0;
-  int index = 1; 
+  int index = 1;
   for (int i = 1; i <= 10; ++i)
   {
     ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
@@ -524,7 +524,7 @@ TEST_F(test_simple, sum_ax_b_threading)
     }, i, arrayindex, x(i / 3)));
     arrayindex -= 2;
   }
-  std::for_each(threads.begin(), threads.end(), [](std::thread &t) 
+  std::for_each(threads.begin(), threads.end(), [](std::thread &t)
   {
     t.join();
   });
@@ -572,13 +572,13 @@ TEST_F(test_simple, sum_ax_b_threading_timer)
 
   gradient_structure gs;
   dvar_vector variables(independants);
-  
+
   ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
   dvariable result = 0;
   ASSERT_EQ(1, gradient_structure::GRAD_STACK1->ptr_index());
 
   double expected = 0;
-  int index = 1; 
+  int index = 1;
   for (int i = 1; i <= 10; ++i)
   {
     ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
@@ -637,41 +637,186 @@ TEST_F(test_simple, sum_ax_b_threading_timer)
     }, i, arrayindex, x(i / 3)));
     arrayindex -= 2;
   }
-  std::for_each(threads.begin(), threads.end(), [](std::thread &t) 
-  {
-    t.join();
-  });
   double grad0 = 0.0;
-  double* grad_ptr0 = gradient_structure::get_INDVAR_LIST()->get_address(0);
   double grad1 = 0.0;
+  double* grad_ptr0 = gradient_structure::get_INDVAR_LIST()->get_address(0);
   double* grad_ptr1 = gradient_structure::get_INDVAR_LIST()->get_address(1);
-  for (int i = 30; i > 0; --i)
-  {
-    grad_stack_entry* gs = gradient_structure::GRAD_STACK1->get_element(i);
-    if (gs->ind_addr1 == grad_ptr0)
+  int index2 = 0;
+  std::for_each(threads.begin(), threads.end(),
+    [&index2, &grad0, &grad_ptr0, &grad1, &grad_ptr1](std::thread &t)
     {
-      grad0 += gs->ind_value1;
+      t.join();
+      for (int i = 0; i < 3; ++i)
+      {
+        grad_stack_entry* gs =
+          gradient_structure::GRAD_STACK1->get_element(index2);
+        if (gs->ind_addr1 == grad_ptr0)
+        {
+          grad0 += gs->ind_value1;
+        }
+        if (gs->ind_addr2 == grad_ptr0)
+        {
+          grad0 += gs->ind_value2;
+        }
+        if (gs->ind_addr1 == grad_ptr1)
+        {
+          grad1 += gs->ind_value1;
+        }
+        if (gs->ind_addr2 == grad_ptr1)
+        {
+          grad1 += gs->ind_value2;
+        }
+        ++index2;
+      }
     }
-    if (gs->ind_addr2 == grad_ptr0)
-    {
-      grad0 += gs->ind_value2;
-    }
-    if (gs->ind_addr1 == grad_ptr1)
-    {
-      grad1 += gs->ind_value1;
-    }
-    if (gs->ind_addr2 == grad_ptr1)
-    {
-      grad1 += gs->ind_value2;
-    }
-  }
+  );
   auto end = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds = end - start;
+  ASSERT_DOUBLE_EQ(grad1, x.size());
+  ASSERT_DOUBLE_EQ(grad0, sum(x));
+
   auto start2 = std::chrono::system_clock::now();
   gradcalc(2, g);
   auto end2 = std::chrono::system_clock::now();
   std::chrono::duration<double> elapsed_seconds2 = end2 - start2;
-  cout << "Time: " 
+  cout << "Time: "
+       << elapsed_seconds.count() << ' ' << elapsed_seconds2.count() << endl;
+  ASSERT_TRUE(elapsed_seconds.count() < elapsed_seconds2.count());
+}
+void devgradcalc(int nvar, dvector& g)
+{
+  gradient_structure::GRAD_LIST->initialize();
+
+  double_and_int* tmp =
+    (double_and_int*)gradient_structure::get_ARRAY_MEMBLOCK_BASE();
+
+  unsigned long int imax =
+    gradient_structure::ARR_LIST1->get_max_last_offset() /
+    sizeof(double_and_int);
+  for (unsigned int i = 0; i < imax; ++i)
+  {
+    tmp->x = 0.0;
+    ++tmp;
+  }
+  unsigned int arrayindex = 20;
+  std::vector<std::thread> threads;
+  for (int i = 30; i > 0; i -= 3)
+  {
+    threads.push_back(std::thread([](int i, int arrayindex)
+    {
+      grad_stack_entry* a = gradient_structure::GRAD_STACK1->get_element(i);
+      //DataRace with next line
+      *a->dep_addr = 1.0;
+      (*(a->func2))(a);
+
+      grad_stack_entry* b = gradient_structure::GRAD_STACK1->get_element(i - 1);
+      *b->dep_addr = 1.0;
+      (*(b->func2))(b);
+
+      grad_stack_entry* c = gradient_structure::GRAD_STACK1->get_element(i - 2);
+      *c->dep_addr = 1.0;
+      (*(c->func2))(c);
+    }, i, arrayindex));
+    arrayindex -= 2;
+  }
+  double grad0 = 0.0;
+  double grad1 = 0.0;
+  double* grad_ptr0 = gradient_structure::get_INDVAR_LIST()->get_address(0);
+  double* grad_ptr1 = gradient_structure::get_INDVAR_LIST()->get_address(1);
+  int index2 = 0;
+  std::for_each(threads.begin(), threads.end(),
+    [&index2, &grad0, &grad_ptr0, &grad1, &grad_ptr1](std::thread &t)
+    {
+      t.join();
+      for (int i = 0; i < 3; ++i)
+      {
+        grad_stack_entry* gs =
+          gradient_structure::GRAD_STACK1->get_element(index2);
+        if (gs->ind_addr1 == grad_ptr0)
+        {
+          grad0 += gs->ind_value1;
+        }
+        if (gs->ind_addr2 == grad_ptr0)
+        {
+          grad0 += gs->ind_value2;
+        }
+        if (gs->ind_addr1 == grad_ptr1)
+        {
+          grad1 += gs->ind_value1;
+        }
+        if (gs->ind_addr2 == grad_ptr1)
+        {
+          grad1 += gs->ind_value2;
+        }
+        ++index2;
+      }
+    }
+  );
+  *grad_ptr0 = grad0;
+  *grad_ptr1 = grad1;
+}
+TEST_F(test_simple, sum_ax_b_thread_devgradcalc)
+{
+  ad_exit=&test_ad_exit;
+
+  //Increases gradient_structure::instances.
+  independent_variables independants(1, 2);
+  independants(1) = 5;
+  independants(2) = 10;
+
+  gradient_structure gs;
+  dvar_vector variables(independants);
+
+  ASSERT_EQ(0, gradient_structure::GRAD_STACK1->ptr_index());
+  dvariable result = 0;
+  ASSERT_EQ(1, gradient_structure::GRAD_STACK1->ptr_index());
+
+  double expected = 0;
+  int index = 1;
+  for (int i = 1; i <= 10; ++i)
+  {
+    ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
+
+    //ax + b
+    result += variables(1) * x(i) + variables(2);
+    expected += independants(1) * x(i) + independants(2);
+
+    index += 3;
+    ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
+  }
+
+  double f = value(result);
+  ASSERT_EQ(index, 31);
+  ASSERT_EQ(index, gradient_structure::GRAD_STACK1->ptr_index());
+
+  for (int i = 30; i > 0; i -= 3)
+  {
+    grad_stack_entry* a = gradient_structure::GRAD_STACK1->get_element(i);
+    a->func2 = &df_plus_eq_pvpv2;
+  }
+
+  dvector g(1, 2);
+  g.initialize();
+
+  auto start = std::chrono::system_clock::now();
+  devgradcalc(2, g);
+  auto end = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds = end - start;
+  ASSERT_DOUBLE_EQ(sum(x), *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
+  ASSERT_DOUBLE_EQ(x.size(), *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
+
+  double* grad_ptr0 = gradient_structure::get_INDVAR_LIST()->get_address(0);
+  double* grad_ptr1 = gradient_structure::get_INDVAR_LIST()->get_address(1);
+  *grad_ptr0 = 0.0;
+  *grad_ptr1 = 0.0;
+  auto start2 = std::chrono::system_clock::now();
+  gradcalc(2, g);
+  auto end2 = std::chrono::system_clock::now();
+  std::chrono::duration<double> elapsed_seconds2 = end2 - start2;
+  ASSERT_DOUBLE_EQ(sum(x), *(gradient_structure::get_INDVAR_LIST()->get_address(0)));
+  ASSERT_DOUBLE_EQ(x.size(), *(gradient_structure::get_INDVAR_LIST()->get_address(1)));
+
+  cout << "Time: "
        << elapsed_seconds.count() << ' ' << elapsed_seconds2.count() << endl;
   ASSERT_TRUE(elapsed_seconds.count() < elapsed_seconds2.count());
 }
