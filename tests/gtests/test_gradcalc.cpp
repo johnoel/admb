@@ -971,3 +971,51 @@ TEST_F(test_gradcalc, log10_manual_gradcalc)
   //Gradient
   ASSERT_DOUBLE_EQ(1.0 / (x(1) * std::log(10)), variables.elem(1).v->x);
 }
+TEST_F(test_gradcalc, get_max_last_offset_big)
+{
+  ad_exit=&test_ad_exit;
+
+  dvector g;
+
+  ASSERT_EQ(0, gradient_structure::get_instances());
+  gradient_structure gs;
+  ASSERT_EQ(1, gradient_structure::get_instances());
+
+  independent_variables x(1, 4000);
+
+  ASSERT_EQ(0, gradient_structure::get_NVAR());
+  dvar_vector variables(x);
+  ASSERT_EQ(4000, gradient_structure::get_NVAR());
+  ASSERT_EQ(4000 * sizeof(double_and_int), gradient_structure::ARR_LIST1->get_max_last_offset());
+
+  double_and_int* tmp =
+    (double_and_int*)gradient_structure::get_ARRAY_MEMBLOCK_BASE();
+  unsigned long int max_last_offset =
+    gradient_structure::ARR_LIST1->get_max_last_offset();
+  size_t size = sizeof(double_and_int);
+  for (unsigned int i = 0; i < (max_last_offset/size); i++)
+  {
+     tmp->x = 0;
+     tmp++;
+  }
+}
+TEST_F(test_gradcalc, get_max_last_offset_big_memset)
+{
+  ad_exit=&test_ad_exit;
+
+  dvector g;
+
+  ASSERT_EQ(0, gradient_structure::get_instances());
+  gradient_structure gs;
+  ASSERT_EQ(1, gradient_structure::get_instances());
+
+  independent_variables x(1, 4000);
+
+  ASSERT_EQ(0, gradient_structure::get_NVAR());
+  dvar_vector variables(x);
+  ASSERT_EQ(4000, gradient_structure::get_NVAR());
+  ASSERT_EQ(4000 * sizeof(double_and_int), gradient_structure::ARR_LIST1->get_max_last_offset());
+
+  memset(gradient_structure::get_ARRAY_MEMBLOCK_BASE(), 0,
+    gradient_structure::ARR_LIST1->get_max_last_offset());
+}
